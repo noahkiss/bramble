@@ -26,9 +26,9 @@ Bramble is the source of truth for how things look, feel, and behave across all 
 
 Multiple switchable color palettes, each with its own font pairings and personality.
 
-**Catppuccin** — clean, polished, slightly formal. For dashboards, financial tools, and productivity apps. Pairs Syne headings with Inter body text.
+**Lagoon** — clean, polished, slightly formal. For dashboards, financial tools, and productivity apps. Pairs Syne headings with Inter body text.
 
-**Desert** — warm, earthy, small-town cozy. For community apps, personal tools, and life management. Pairs Lora headings with Nunito Sans body text.
+**Meadow** — warm, earthy, small-town cozy. For community apps, personal tools, and life management. Pairs Lora headings with Nunito Sans body text.
 
 <!-- TODO: side-by-side screenshot of both themes -->
 
@@ -73,5 +73,5 @@ docker run -p 3000:3000 bramble
 ---
 
 <p align="center">
-  <sub>Built with SvelteKit + shadcn-svelte. Hosted on Komodo.</sub>
+  <sub>Built with SvelteKit + shadcn-svelte.</sub>
 </p>

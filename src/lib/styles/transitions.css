@@ -1,0 +1,258 @@
+/* ============================================================
+   Bramble Transitions
+   Low-profile, quick interaction feedback.
+   Import in app.css — available globally.
+
+   Interaction behavior is applied via [data-slot] selectors so
+   shadcn component files stay unmodified. Color/variant overrides
+   still belong in the component files (design decisions, not
+   interaction behavior).
+
+   Portable: copy this file into any project using shadcn-svelte
+   to get the same interaction polish.
+   ============================================================ */
+
+:root {
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---- Interactive elements: press + smooth transitions ---- */
+
+[data-slot="button"],
+[data-slot="toggle"],
+[data-slot="accordion-trigger"] {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    background-color var(--duration-normal) var(--ease-out),
+    color var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out),
+    opacity var(--duration-normal) var(--ease-out);
+}
+
+[data-slot="button"]:active:not(:disabled):not([aria-disabled="true"]),
+[data-slot="toggle"]:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ---- Form controls: focus transitions ---- */
+
+[data-slot="input"],
+[data-slot="select-trigger"] {
+  transition:
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+[data-slot="switch"] {
+  transition:
+    background-color var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+[data-slot="switch-thumb"] {
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+[data-slot="checkbox"] {
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+/* ---- Slider ---- */
+
+[data-slot="slider-thumb"] {
+  transition:
+    box-shadow var(--duration-normal) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+[data-slot="slider-thumb"]:active {
+  transform: scale(1.15);
+}
+
+/* ---- Badge: default cursor, not text cursor ---- */
+
+[data-slot="badge"] {
+  cursor: default;
+}
+
+/* ---- Destructive variants: suppress inherited border ---- */
+/* The base * { border-border } leaks a visible stroke on
+   high-contrast backgrounds. Force transparent so only the
+   component's own border-color (if any) shows. */
+
+[data-slot="badge"].bg-destructive,
+[data-slot="button"].bg-destructive {
+  border-color: transparent;
+}
+
+/* ---- Alert: support iconify-icon alongside SVG ---- */
+/* shadcn alerts use has-[>svg] to set grid columns; iconify-icon
+   is a web component, not an SVG, so we match the same layout. */
+
+[data-slot="alert"]:has(> iconify-icon) {
+  grid-template-columns: calc(var(--spacing) * 4) 1fr;
+  gap: 0 0.75rem;
+}
+
+[data-slot="alert"] > iconify-icon {
+  grid-row: 1 / -1;
+  align-self: start;
+  margin-top: 0.125rem;
+}
+
+[data-slot="alert-title"] {
+  font-size: 1.05em;
+}
+
+/* ---- Alert semantic variants (data-variant) ---- */
+/* Light mode: tinted pastel backgrounds with dark text.
+   Dark mode: deep colored backgrounds with light text.
+   Uses OKLCH relative color syntax to derive bg/border from
+   theme tokens — adapts automatically across themes. */
+
+/* Light mode: dark text on light tinted backgrounds */
+[data-slot="alert"][data-variant="info"],
+[data-slot="alert"][data-variant="success"],
+[data-slot="alert"][data-variant="warning"],
+[data-slot="alert"][data-variant="error"] {
+  color: oklch(0.25 0.02 0);
+}
+
+[data-slot="alert"][data-variant="info"] [data-slot="alert-description"],
+[data-slot="alert"][data-variant="success"] [data-slot="alert-description"],
+[data-slot="alert"][data-variant="warning"] [data-slot="alert-description"],
+[data-slot="alert"][data-variant="error"] [data-slot="alert-description"] {
+  color: oklch(0.35 0.02 0);
+}
+
+[data-slot="alert"][data-variant="info"] > iconify-icon,
+[data-slot="alert"][data-variant="success"] > iconify-icon,
+[data-slot="alert"][data-variant="warning"] > iconify-icon,
+[data-slot="alert"][data-variant="error"] > iconify-icon {
+  color: oklch(0.3 0.02 0);
+}
+
+[data-slot="alert"][data-variant="info"] {
+  background: oklch(from var(--primary) 0.93 calc(c * 0.3) h);
+  border-color: oklch(from var(--primary) 0.75 calc(c * 0.6) h);
+}
+
+[data-slot="alert"][data-variant="success"] {
+  background: oklch(from var(--success) 0.93 calc(c * 0.3) h);
+  border-color: oklch(from var(--success) 0.75 calc(c * 0.6) h);
+}
+
+[data-slot="alert"][data-variant="warning"] {
+  background: oklch(from var(--warning) 0.93 calc(c * 0.3) h);
+  border-color: oklch(from var(--warning) 0.75 calc(c * 0.6) h);
+}
+
+[data-slot="alert"][data-variant="error"] {
+  background: oklch(from var(--destructive) 0.93 calc(c * 0.3) h);
+  border-color: oklch(from var(--destructive) 0.75 calc(c * 0.6) h);
+}
+
+/* Dark mode: light text on deep colored backgrounds */
+html.dark [data-slot="alert"][data-variant="info"],
+html.dark [data-slot="alert"][data-variant="success"],
+html.dark [data-slot="alert"][data-variant="warning"],
+html.dark [data-slot="alert"][data-variant="error"] {
+  color: oklch(0.97 0 0);
+}
+
+html.dark [data-slot="alert"][data-variant="info"] [data-slot="alert-description"],
+html.dark [data-slot="alert"][data-variant="success"] [data-slot="alert-description"],
+html.dark [data-slot="alert"][data-variant="warning"] [data-slot="alert-description"],
+html.dark [data-slot="alert"][data-variant="error"] [data-slot="alert-description"] {
+  color: oklch(0.85 0 0);
+}
+
+html.dark [data-slot="alert"][data-variant="info"] > iconify-icon,
+html.dark [data-slot="alert"][data-variant="success"] > iconify-icon,
+html.dark [data-slot="alert"][data-variant="warning"] > iconify-icon,
+html.dark [data-slot="alert"][data-variant="error"] > iconify-icon {
+  color: oklch(0.95 0 0);
+}
+
+html.dark [data-slot="alert"][data-variant="info"] {
+  background: oklch(from var(--primary) 0.3 calc(c * 0.5) h);
+  border-color: oklch(from var(--primary) 0.5 c h);
+}
+
+html.dark [data-slot="alert"][data-variant="success"] {
+  background: oklch(from var(--success) 0.3 calc(c * 0.5) h);
+  border-color: oklch(from var(--success) 0.55 c h);
+}
+
+html.dark [data-slot="alert"][data-variant="warning"] {
+  background: oklch(from var(--warning) 0.35 calc(c * 0.5) h);
+  border-color: oklch(from var(--warning) 0.6 c h);
+}
+
+html.dark [data-slot="alert"][data-variant="error"] {
+  background: oklch(from var(--destructive) 0.3 calc(c * 0.5) h);
+  border-color: oklch(from var(--destructive) 0.5 c h);
+}
+
+/* ---- Progress bar fill ---- */
+
+[data-slot="progress-indicator"] {
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+/* ---- Animations for overlays and popups ---- */
+
+.fade-in {
+  animation: bramble-fade-in var(--duration-normal) var(--ease-out);
+}
+
+.fade-out {
+  animation: bramble-fade-out var(--duration-fast) var(--ease-out);
+}
+
+@keyframes bramble-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bramble-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.slide-up {
+  animation: bramble-slide-up var(--duration-normal) var(--ease-out);
+}
+
+.slide-down {
+  animation: bramble-slide-down var(--duration-normal) var(--ease-out);
+}
+
+@keyframes bramble-slide-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bramble-slide-down {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scale-in {
+  animation: bramble-scale-in var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes bramble-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}

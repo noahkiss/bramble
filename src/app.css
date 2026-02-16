@@ -1,14 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./lib/styles/transitions.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   Theme: Catppuccin (default)
-   Light = Latte, Dark = Mocha
+   Theme: Lagoon (default)
+   Cool, polished, mysterious — Syne + Inter
    ============================================================ */
 :root,
-html[data-theme="catppuccin"] {
+html[data-theme="lagoon"] {
   --radius: 0.5rem;
   --font-heading: "Syne", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
@@ -50,9 +51,9 @@ html[data-theme="catppuccin"] {
   --sidebar-ring: oklch(0.5 0.2 260);
 }
 
-html[data-theme="catppuccin"] .dark,
-:root .dark {
-  /* Catppuccin Mocha */
+html[data-theme="lagoon"].dark,
+:root.dark {
+  /* Lagoon Dark */
   --background: oklch(0.25 0.015 270);
   --foreground: oklch(0.9 0.015 275);
   --card: oklch(0.3 0.015 270);
@@ -64,7 +65,7 @@ html[data-theme="catppuccin"] .dark,
   --secondary: oklch(0.35 0.015 270);
   --secondary-foreground: oklch(0.9 0.015 275);
   --muted: oklch(0.35 0.015 270);
-  --muted-foreground: oklch(0.65 0.015 275);
+  --muted-foreground: oklch(0.72 0.015 275);
   --accent: oklch(0.8 0.12 340);
   --accent-foreground: oklch(0.2 0.01 270);
   --destructive: oklch(0.65 0.18 20);
@@ -89,10 +90,10 @@ html[data-theme="catppuccin"] .dark,
 }
 
 /* ============================================================
-   Theme: Desert
-   Warm earthy tones — sandstone, sage, terracotta
+   Theme: Meadow
+   Warm, earthy, cozy — Lora + Nunito Sans
    ============================================================ */
-html[data-theme="desert"] {
+html[data-theme="meadow"] {
   --radius: 0.5rem;
   --font-heading: "Lora", Georgia, serif;
   --font-body: "Nunito Sans", system-ui, sans-serif;
@@ -134,8 +135,8 @@ html[data-theme="desert"] {
   --sidebar-ring: oklch(0.55 0.14 45);
 }
 
-html[data-theme="desert"] .dark {
-  /* Desert Dark */
+html[data-theme="meadow"].dark {
+  /* Meadow Dark */
   --background: oklch(0.22 0.025 50);
   --foreground: oklch(0.9 0.02 75);
   --card: oklch(0.28 0.025 50);

@@ -1,14 +1,14 @@
 export const themes = [
 	{
-		id: 'catppuccin',
-		label: 'Catppuccin',
-		description: 'Clean, polished, professional',
+		id: 'lagoon',
+		label: 'Lagoon',
+		description: 'Cool, polished, mysterious',
 		headingFont: 'Syne',
 		bodyFont: 'Inter'
 	},
 	{
-		id: 'desert',
-		label: 'Desert',
+		id: 'meadow',
+		label: 'Meadow',
 		description: 'Warm, earthy, cozy',
 		headingFont: 'Lora',
 		bodyFont: 'Nunito Sans'

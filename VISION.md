@@ -10,7 +10,7 @@ A personal design system, component showcase, and brand guide. Bramble is the so
 - **Mobile patterns** — iOS-native-feeling patterns documented as reusable guidelines
 - **Agent context** — structured so Claude (and humans) can reference it from any project
 
-Hosted as a Docker container on Komodo. Public GitHub repo.
+Public GitHub repo.
 
 ---
 
@@ -41,7 +41,7 @@ Each theme includes:
 - Recommended heading + body font pairing
 - Semantic color mapping (primary, secondary, accent, success, warning, error, etc.)
 
-### Theme: Catppuccin (Primary)
+### Theme: Lagoon (Primary)
 
 Based on the Catppuccin palette (Latte for light, Mocha for dark). Clean, slightly formal, polished.
 
@@ -60,7 +60,7 @@ Based on the Catppuccin palette (Latte for light, Mocha for dark). Clean, slight
 
 (Full OKLCH token definitions in the codebase.)
 
-### Theme: Desert (Secondary)
+### Theme: Meadow (Secondary)
 
 Earthy, warm, small-town cozy. Inspired by desert landscapes, aged paper, and local coffee shops.
 
@@ -198,8 +198,8 @@ Project banners follow a consistent format:
 ### Palette Adaptation
 
 Penny's core coloring (browns, tans) is neutral enough to sit in any palette. Adapt the *scene and accents* to match the project theme:
-- **Catppuccin:** Cool blue/pink accents in the background, clean surfaces
-- **Desert:** Warm sandstone setting, earth-tone props, golden light
+- **Lagoon:** Cool blue/pink accents in the background, clean surfaces
+- **Meadow:** Warm sandstone setting, earth-tone props, golden light
 - **Any theme:** Pull 2-3 accent colors from the theme into the scene's props/background
 
 ---
@@ -266,7 +266,7 @@ Every project README follows a consistent layout:
 - **Icons:** Iconify (Solar set)
 - **Fonts:** Fontsource CDN
 - **Build:** Vite, Node adapter
-- **Deployment:** Docker (multi-platform: linux/amd64, linux/arm64), Komodo
+- **Deployment:** Docker (multi-platform: linux/amd64, linux/arm64)
 
 ---
 
