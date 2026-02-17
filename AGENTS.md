@@ -7,6 +7,8 @@ Personal design system, component showcase, and brand guide.
 If you're referencing Bramble from another project (not working on Bramble itself), here's what to read:
 
 - **`VISION.md`** — the design system reference: themes, colors, typography, icons, Penny brand guide, mobile patterns, CSS conventions. This is your primary source.
+- **`penny/SKILL.md`** — Penny asset toolkit: generate poses/scenes/favicons, resize for projects. CLI reference.
+- **`penny/PENNY.md`** — full character bible, prompt templates, generation guidelines.
 - **`src/app.css`** — exact OKLCH token values for each theme (copy these into your project)
 - **`src/lib/styles/transitions.css`** — portable interaction CSS (press feedback, focus transitions). Works with any shadcn-svelte project — drop it in and import.
 
@@ -64,4 +66,5 @@ CI: `.github/workflows/docker.yml` builds and pushes to `ghcr.io/noahkiss/brambl
 - `src/lib/themes.ts` — theme metadata for UI
 - `src/routes/+layout.svelte` — shell with theme/mode switcher
 - `src/routes/+page.svelte` — component showcase
+- `penny/` — all Penny assets, generation CLI, and agent skill
 - `VISION.md` — full design philosophy and brand guide

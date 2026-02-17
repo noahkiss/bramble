@@ -185,6 +185,8 @@ Warm browns and tans, big expressive eyes, friendly expression.
 [PALETTE: use colors #1e1e2e, #89b4fa, #f5c2e7 as accents in the scene]
 ```
 
+Full prompt templates, variant definitions, and generation history: see `penny/PENNY.md` and `penny/GENERATION-NOTES.md`. For the CLI toolkit: `penny/SKILL.md`.
+
 ### Banner Image Standards
 
 Project banners follow a consistent format:
