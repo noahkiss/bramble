@@ -1,0 +1,351 @@
+#!/usr/bin/env zsh
+# penny/cli — Penny the Hedgehog asset toolkit
+# Generate, resize, and list Penny assets for any project.
+set -euo pipefail
+
+SCRIPT_DIR="${0:a:h}"
+REPO_ROOT="${SCRIPT_DIR}/.."
+
+# Source .env if present (for GEMINI_API_KEY)
+[[ -f "$REPO_ROOT/.env" ]] && source "$REPO_ROOT/.env"
+
+# Paths
+CHAR_SHEET="$SCRIPT_DIR/character-sheet.png"
+POSES_DIR="$SCRIPT_DIR/poses"
+SCENES_DIR="$SCRIPT_DIR/scenes"
+FAVICONS_DIR="$SCRIPT_DIR/favicons"
+
+# ── Helpers ──────────────────────────────────────────────────────────
+
+die() { echo "error: $*" >&2; exit 1; }
+
+require_gemini() {
+  : "${GEMINI_API_KEY:?Set GEMINI_API_KEY in .env or environment}"
+  export GEMINI_API_KEY
+  export NANOBANANA_MODEL="${NANOBANANA_MODEL:-gemini-3-pro-image-preview}"
+  command -v gemini &>/dev/null || die "gemini CLI not found — install nanobanana"
+}
+
+require_magick() {
+  command -v magick &>/dev/null || die "ImageMagick 7 (magick) not found"
+}
+
+usage() {
+  cat <<'USAGE'
+penny/cli — Penny the Hedgehog asset toolkit
+
+Usage: penny/cli <command> [options]
+
+Commands:
+  generate favicon   Generate favicon source images for a theme
+  generate pose      Generate a new Penny pose via Gemini
+  generate scene     Generate a themed scene via Gemini
+  resize             Resize source image into favicon/icon set
+  list poses         List available poses in library
+  list scenes        List available scenes in library
+  list themes        Show theme palettes with hex codes
+  help               Show this message
+
+Examples:
+  penny/cli generate pose --activity "debugging code" --look nerdy
+  penny/cli generate scene --theme lagoon --format banner --activity "reading by a pond"
+  penny/cli generate favicon --theme lagoon
+  penny/cli resize --input penny/favicons/lagoon-1.png --output ~/project/static/
+  penny/cli list poses
+USAGE
+}
+
+# ── Theme palettes (hex codes for Gemini prompts) ────────────────────
+
+typeset -A THEME_COLORS THEME_LABELS
+THEME_COLORS=(
+  [lagoon]="#89b4fa (blue), #f5c2e7 (pink), #b4befe (lavender), #1e1e2e (navy), #94e2d5 (teal)"
+  [meadow]="#d4a574 (sandstone), #8b7355 (golden brown), #c4956a (copper), #e8d5b7 (cream), #7a8b5c (olive)"
+)
+THEME_LABELS=(
+  [lagoon]="Lagoon — Cool, polished, mysterious (Catppuccin)"
+  [meadow]="Meadow — Warm, earthy, cozy (Desert)"
+)
+
+# ── Shared generation helper ─────────────────────────────────────────
+
+generate_image() {
+  local target="$1" prompt="$2"
+
+  if [[ -f "$target" ]]; then
+    echo "SKIP $target (already exists)"
+    return 0
+  fi
+
+  echo "Generating $target ..."
+  (cd "$REPO_ROOT" && gemini --yolo -p "/edit $CHAR_SHEET \"$prompt\"" 2>&1 | tail -3)
+
+  local newest=$(ls -t "$REPO_ROOT"/nanobanana-output/*.png 2>/dev/null | head -1)
+  if [[ -n "$newest" ]]; then
+    cp "$newest" "$target"
+    echo "Saved $target"
+    return 0
+  else
+    echo "Failed — no output image produced"
+    return 1
+  fi
+}
+
+# ── List subcommands ─────────────────────────────────────────────────
+
+cmd_list_poses() {
+  echo "Available poses (penny/poses/):"
+  echo ""
+  for f in "$POSES_DIR"/*.png(N); do
+    local base="${f:t:r}"
+    local num="${base%%-*}"
+    local name="${base#*-}"
+    printf "  %s  %s\n" "$num" "${name//-/ }"
+  done
+  echo ""
+  echo "$(ls "$POSES_DIR"/*.png 2>/dev/null | wc -l | tr -d ' ') poses total"
+}
+
+cmd_list_scenes() {
+  echo "Available scenes (penny/scenes/):"
+  echo ""
+  for f in "$SCENES_DIR"/*.png(N); do
+    local base="${f:t:r}"
+    if [[ "$base" =~ '^(hoglets|lagoon|meadow)-(.+)-([0-9]+)$' ]]; then
+      local theme="${match[1]}"
+      local desc="${match[2]}"
+      local variant="${match[3]}"
+      printf "  %-8s %s (v%s)\n" "$theme" "${desc//-/ }" "$variant"
+    else
+      printf "  %s\n" "$base"
+    fi
+  done
+  echo ""
+  echo "$(ls "$SCENES_DIR"/*.png 2>/dev/null | wc -l | tr -d ' ') scenes total"
+}
+
+cmd_list_themes() {
+  echo "Available themes:"
+  echo ""
+  for theme in lagoon meadow; do
+    echo "  ${THEME_LABELS[$theme]}"
+    echo "  Colors: ${THEME_COLORS[$theme]}"
+    echo ""
+  done
+}
+
+# ── Resize subcommand ────────────────────────────────────────────────
+
+cmd_resize() {
+  local input="" output="."
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --input|-i)  input="$2"; shift 2 ;;
+      --output|-o) output="$2"; shift 2 ;;
+      *) die "Unknown resize option: $1" ;;
+    esac
+  done
+
+  [[ -n "$input" ]] || die "resize requires --input <source.png>"
+  [[ -f "$input" ]] || die "Input file not found: $input"
+  require_magick
+
+  mkdir -p "$output"
+
+  echo "Resizing $input -> $output/"
+
+  # PNG icons at standard sizes
+  local -a ICON_NAMES ICON_SIZES
+  ICON_NAMES=(favicon-16x16.png favicon-32x32.png apple-touch-icon.png icon-192.png icon-512.png)
+  ICON_SIZES=(16 32 180 192 512)
+
+  for i in {1..${#ICON_NAMES}}; do
+    local name="${ICON_NAMES[$i]}"
+    local size="${ICON_SIZES[$i]}"
+    magick "$input" -resize "${size}x${size}" -gravity center -extent "${size}x${size}" "$output/$name"
+    echo "  $name (${size}x${size})"
+  done
+
+  # ICO with 16 and 32 embedded
+  magick "$input" -resize 16x16 -gravity center -extent 16x16 "$output/favicon-16.tmp.png"
+  magick "$input" -resize 32x32 -gravity center -extent 32x32 "$output/favicon-32.tmp.png"
+  magick "$output/favicon-16.tmp.png" "$output/favicon-32.tmp.png" "$output/favicon.ico"
+  rm -f "$output/favicon-16.tmp.png" "$output/favicon-32.tmp.png"
+  echo "  favicon.ico (16+32)"
+
+  echo ""
+  echo "Done. Files written to $output/"
+}
+
+# ── Generate pose subcommand ─────────────────────────────────────────
+
+cmd_generate_pose() {
+  local activity="" look="" count=2 name=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --activity|-a) activity="$2"; shift 2 ;;
+      --look|-l)     look="$2"; shift 2 ;;
+      --count|-c)    count="$2"; shift 2 ;;
+      --name|-n)     name="$2"; shift 2 ;;
+      *) die "Unknown generate pose option: $1" ;;
+    esac
+  done
+
+  [[ -n "$activity" ]] || die "generate pose requires --activity <description>"
+  require_gemini
+
+  if [[ -z "$name" ]]; then
+    local last=$(ls "$POSES_DIR"/*.png 2>/dev/null | sort | tail -1)
+    local next_num=1
+    if [[ -n "$last" ]]; then
+      local last_base="${last:t:r}"
+      next_num=$(( ${last_base%%-*} + 1 ))
+    fi
+    local slug="${activity// /-}"
+    slug="${slug:l}"
+    name="$(printf '%02d' $next_num)-${slug}"
+  fi
+
+  local identity='This is a character reference sheet for a baby hedgehog named Penny. Using the exact same character shown — same proportions, same face, same art style, same coloring — generate a SINGLE NEW IMAGE of just this one character.'
+  local scene="She is ${activity}."
+  if [[ -n "$look" ]]; then
+    scene="She is wearing her ${look} look. ${scene}"
+  fi
+  local guard='No whiskers. Output ONLY the new single pose on a white background. Do NOT include the reference sheet or any of the original poses. Just one hedgehog in one new pose, filling the frame.'
+
+  local prompt="${identity} ${scene} ${guard}"
+
+  echo "Generating pose: $activity"
+  [[ -n "$look" ]] && echo "Look: $look"
+  echo "Variants: $count"
+  echo ""
+
+  for num in $(seq 1 "$count"); do
+    generate_image "$POSES_DIR/${name}-v${num}.png" "$prompt"
+    echo ""
+  done
+
+  echo "Done. Check $POSES_DIR/ for results."
+}
+
+# ── Generate scene subcommand ────────────────────────────────────────
+
+cmd_generate_scene() {
+  local activity="" theme="" format="banner" count=2 name=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --activity|-a) activity="$2"; shift 2 ;;
+      --theme|-t)    theme="$2"; shift 2 ;;
+      --format|-f)   format="$2"; shift 2 ;;
+      --count|-c)    count="$2"; shift 2 ;;
+      --name|-n)     name="$2"; shift 2 ;;
+      *) die "Unknown generate scene option: $1" ;;
+    esac
+  done
+
+  [[ -n "$activity" ]] || die "generate scene requires --activity <description>"
+  [[ -n "$theme" ]] || die "generate scene requires --theme <lagoon|meadow>"
+  [[ -n "${THEME_COLORS[$theme]:-}" ]] || die "Unknown theme: $theme (try: lagoon, meadow)"
+  require_gemini
+
+  if [[ -z "$name" ]]; then
+    local slug="${activity// /-}"
+    slug="${slug:l}"
+    name="${theme}-${format}-${slug}"
+  fi
+
+  local fmt_instruction=""
+  case "$format" in
+    banner) fmt_instruction="Wide horizontal 3:1 banner format." ;;
+    square) fmt_instruction="Square 1:1 composition." ;;
+    *) die "Unknown format: $format (try: banner, square)" ;;
+  esac
+
+  local colors="${THEME_COLORS[$theme]}"
+  local prompt="Same character as reference sheet. Penny ${activity}. Use colors: ${colors}. ${fmt_instruction} No whiskers. One scene, no reference sheet in output."
+
+  echo "Generating scene: $activity"
+  echo "Theme: $theme | Format: $format"
+  echo "Variants: $count"
+  echo ""
+
+  for num in $(seq 1 "$count"); do
+    generate_image "$SCENES_DIR/${name}-${num}.png" "$prompt"
+    echo ""
+  done
+
+  echo "Done. Check $SCENES_DIR/ for results."
+}
+
+# ── Generate favicon subcommand ──────────────────────────────────────
+
+cmd_generate_favicon() {
+  local theme="" count=2
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --theme|-t) theme="$2"; shift 2 ;;
+      --count|-c) count="$2"; shift 2 ;;
+      *) die "Unknown generate favicon option: $1" ;;
+    esac
+  done
+
+  [[ -n "$theme" ]] || die "generate favicon requires --theme <lagoon|meadow|default>"
+  require_gemini
+
+  # NOTE: Favicon prompt is a starting point — iterate through actual
+  # generation sessions to refine what works best at small sizes.
+  local colors=""
+  if [[ "$theme" != "default" ]]; then
+    [[ -n "${THEME_COLORS[$theme]:-}" ]] || die "Unknown theme: $theme (try: lagoon, meadow, default)"
+    colors="Background: soft wash of theme colors ${THEME_COLORS[$theme]}."
+  else
+    colors="Clean white background."
+  fi
+
+  local prompt="Same character as reference sheet. A close-up of Penny's face, centered, looking directly at the viewer with a warm friendly expression. Tight crop — just head and upper body filling the frame. Simple composition that reads clearly at small sizes. Bold shapes, minimal fine detail. ${colors} No whiskers. No reference sheet in output. Just one image."
+
+  echo "Generating favicon source: $theme"
+  echo "Variants: $count"
+  echo "NOTE: Favicon prompts are a starting point — curate results and iterate."
+  echo ""
+
+  for num in $(seq 1 "$count"); do
+    generate_image "$FAVICONS_DIR/${theme}-${num}.png" "$prompt"
+    echo ""
+  done
+
+  echo "Done. Check $FAVICONS_DIR/ for results."
+  echo "Use 'penny/cli resize --input $FAVICONS_DIR/<chosen>.png --output <target>/' to package."
+}
+
+# ── Subcommand routing ───────────────────────────────────────────────
+
+cmd="${1:-help}"
+sub="${2:-}"
+shift 2 2>/dev/null || shift $# 2>/dev/null || true
+
+case "$cmd" in
+  generate)
+    case "$sub" in
+      favicon) cmd_generate_favicon "$@" ;;
+      pose)    cmd_generate_pose "$@" ;;
+      scene)   cmd_generate_scene "$@" ;;
+      *)       die "Unknown generate target: $sub (try: favicon, pose, scene)" ;;
+    esac
+    ;;
+  resize)    [[ -n "$sub" ]] && cmd_resize "$sub" "$@" || cmd_resize "$@" ;;
+  list)
+    case "$sub" in
+      poses)   cmd_list_poses ;;
+      scenes)  cmd_list_scenes ;;
+      themes)  cmd_list_themes ;;
+      *)       die "Unknown list target: $sub (try: poses, scenes, themes)" ;;
+    esac
+    ;;
+  help|--help|-h) usage ;;
+  *) die "Unknown command: $cmd (try: generate, resize, list, help)" ;;
+esac
