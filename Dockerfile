@@ -1,4 +1,4 @@
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 RUN corepack enable pnpm
 
@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:22-slim AS runtime
+FROM node:24-slim AS runtime
 
 RUN corepack enable pnpm
 
@@ -19,6 +19,11 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
+# This is a second, independent install, so it needs the allowBuilds list too.
+# Nothing in the production tree runs an install script today, but pnpm 11
+# defaults strictDepBuilds to true: the first native prod dependency added
+# without this file turns a silent "Ignored build scripts" into a failed build.
+COPY --from=builder /app/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 ENV NODE_ENV=production
