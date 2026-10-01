@@ -21,6 +21,7 @@ ap.add_argument("--bottom", type=int, required=True)
 ap.add_argument("--x0", type=int, default=0); ap.add_argument("--width", type=int, default=0)
 ap.add_argument("--side", type=float, default=0.12); ap.add_argument("--top", type=float, default=0.30)
 ap.add_argument("--solid", type=int, default=10)
+ap.add_argument("--headroom", type=float, default=0, help="crop the top to this fraction of headroom above the content; top fade covers it")
 o = ap.parse_args()
 
 def ss(x, lo, hi):
@@ -44,7 +45,14 @@ a2 = a2 * (0.6 + 0.4 * keep)
 a2 = np.where(a2 < 0.10, 0, a2)
 # 3. crop
 w0 = o.width or rgb.shape[1]
-sl = (slice(0, o.bottom), slice(o.x0, o.x0 + w0))
+y0 = 0
+if o.headroom:
+    cols = slice(o.x0, o.x0 + w0)
+    rows = np.where(((a2[:o.bottom, cols] > 0.3).sum(1)) >= 3)[0]
+    top = int(rows[0])
+    y0 = max(0, int(round(top - o.headroom * (o.bottom - top) / (1 - o.headroom))))
+    o.top = min(o.top, (top - y0) / (o.bottom - y0) * 1.1) if o.top else 0
+sl = (slice(y0, o.bottom), slice(o.x0, o.x0 + w0))
 rgb, a2, bled = rgb[sl], a2[sl], bled[sl]
 h, w = a2.shape
 # 4. crisp bottom: ramp to opaque over the last N rows, filling gaps with bled colour
@@ -65,4 +73,4 @@ if o.solid:
 x = np.linspace(0, 1, w)[None, :]; y = np.linspace(0, 1, h)[:, None]
 a2 = a2 * ss(x, 0, o.side) * ss(1 - x, 0, o.side) * ss(y, 0, o.top)
 Image.fromarray((np.dstack([rgb, a2]) * 255 + 0.5).astype(np.uint8), "RGBA").save(o.dst, optimize=True)
-print(o.dst, w, h)
+print(o.dst, w, h, "y0", y0)
