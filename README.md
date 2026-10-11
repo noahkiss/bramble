@@ -53,8 +53,8 @@ iOS-native-feeling patterns documented as reusable guidelines. Bottom tab bars, 
 ## Develop
 
 ```bash
-# Prerequisites: Node.js via fnm
-fnm use --install-if-missing
+# Prerequisites: Node.js via mise (reads .node-version)
+mise install
 
 # Install dependencies
 pnpm install
