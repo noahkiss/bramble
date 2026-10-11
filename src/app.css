@@ -136,39 +136,39 @@ html[data-theme="meadow"] {
 }
 
 html[data-theme="meadow"].dark {
-  /* Meadow Dark */
-  --background: oklch(0.22 0.025 50);
-  --foreground: oklch(0.9 0.02 75);
-  --card: oklch(0.28 0.025 50);
-  --card-foreground: oklch(0.9 0.02 75);
-  --popover: oklch(0.28 0.025 50);
-  --popover-foreground: oklch(0.9 0.02 75);
+  /* Meadow Dark — "Sage Stone" (green-gray base, warm accents) */
+  --background: oklch(0.20 0.015 160);
+  --foreground: oklch(0.92 0.02 80);
+  --card: oklch(0.26 0.015 160);
+  --card-foreground: oklch(0.92 0.02 80);
+  --popover: oklch(0.26 0.015 160);
+  --popover-foreground: oklch(0.92 0.02 80);
   --primary: oklch(0.72 0.12 45);
   --primary-foreground: oklch(0.2 0.02 50);
-  --secondary: oklch(0.35 0.025 50);
-  --secondary-foreground: oklch(0.9 0.02 75);
-  --muted: oklch(0.35 0.025 50);
-  --muted-foreground: oklch(0.65 0.02 65);
+  --secondary: oklch(0.32 0.015 160);
+  --secondary-foreground: oklch(0.92 0.02 80);
+  --muted: oklch(0.32 0.015 160);
+  --muted-foreground: oklch(0.66 0.015 120);
   --accent: oklch(0.7 0.08 150);
   --accent-foreground: oklch(0.2 0.02 50);
   --destructive: oklch(0.6 0.18 22);
   --success: oklch(0.7 0.1 150);
   --warning: oklch(0.8 0.1 85);
-  --border: oklch(0.38 0.025 50);
-  --input: oklch(0.38 0.025 50);
+  --border: oklch(0.36 0.015 160);
+  --input: oklch(0.36 0.015 160);
   --ring: oklch(0.72 0.12 45);
   --chart-1: oklch(0.72 0.12 45);
   --chart-2: oklch(0.7 0.08 150);
   --chart-3: oklch(0.7 0.1 25);
   --chart-4: oklch(0.8 0.1 85);
   --chart-5: oklch(0.65 0.06 200);
-  --sidebar: oklch(0.25 0.025 50);
-  --sidebar-foreground: oklch(0.9 0.02 75);
+  --sidebar: oklch(0.23 0.015 160);
+  --sidebar-foreground: oklch(0.92 0.02 80);
   --sidebar-primary: oklch(0.72 0.12 45);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.35 0.025 50);
-  --sidebar-accent-foreground: oklch(0.9 0.02 75);
-  --sidebar-border: oklch(0.38 0.025 50);
+  --sidebar-accent: oklch(0.32 0.015 160);
+  --sidebar-accent-foreground: oklch(0.92 0.02 80);
+  --sidebar-border: oklch(0.36 0.015 160);
   --sidebar-ring: oklch(0.72 0.12 45);
 }
 
