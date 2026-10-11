@@ -77,15 +77,20 @@ generate_image() {
     return 0
   fi
 
-  echo "Generating $target ..."
-  (cd "$REPO_ROOT" && gemini --yolo -p "/edit $CHAR_SHEET \"$prompt\"" 2>&1 | tail -3)
+  # Run gemini from a temp dir to avoid polluting any project repo
+  local workdir=$(mktemp -d)
+  echo "Generating ..."
+  (cd "$workdir" && gemini --yolo -p "/edit $CHAR_SHEET \"$prompt\"" &>/dev/null)
 
-  local newest=$(ls -t "$REPO_ROOT"/nanobanana-output/*.png 2>/dev/null | head -1)
+  local newest=$(ls -t "$workdir"/nanobanana-output/*.png 2>/dev/null | head -1)
   if [[ -n "$newest" ]]; then
+    mkdir -p "${target:h}"
     cp "$newest" "$target"
+    rm -rf "$workdir"
     echo "Saved $target"
     return 0
   else
+    rm -rf "$workdir"
     echo "Failed — no output image produced"
     return 1
   fi
@@ -153,7 +158,20 @@ cmd_resize() {
 
   mkdir -p "$output"
 
-  echo "Resizing $input -> $output/"
+  # Center-crop non-square sources to square before resizing
+  local dims=$(magick identify -format '%wx%h' "$input")
+  local w=${dims%x*} h=${dims#*x}
+  local cropped="$output/.penny-crop-tmp.png"
+
+  if (( w != h )); then
+    local side=$(( w < h ? w : h ))
+    echo "Source is ${w}x${h} — center-cropping to ${side}x${side}"
+    magick "$input" -gravity center -crop "${side}x${side}+0+0" +repage "$cropped"
+  else
+    cp "$input" "$cropped"
+  fi
+
+  echo "Resizing -> $output/"
 
   # PNG icons at standard sizes
   local -a ICON_NAMES ICON_SIZES
@@ -163,15 +181,20 @@ cmd_resize() {
   for i in {1..${#ICON_NAMES}}; do
     local name="${ICON_NAMES[$i]}"
     local size="${ICON_SIZES[$i]}"
-    magick "$input" -resize "${size}x${size}" -gravity center -extent "${size}x${size}" "$output/$name"
+    if (( size <= 32 )); then
+      # Sharpen small icons for crispness
+      magick "$cropped" -resize "${size}x${size}" -sharpen 0x0.5 "$output/$name"
+    else
+      magick "$cropped" -resize "${size}x${size}" "$output/$name"
+    fi
     echo "  $name (${size}x${size})"
   done
 
   # ICO with 16 and 32 embedded
-  magick "$input" -resize 16x16 -gravity center -extent 16x16 "$output/favicon-16.tmp.png"
-  magick "$input" -resize 32x32 -gravity center -extent 32x32 "$output/favicon-32.tmp.png"
+  magick "$cropped" -resize 16x16 -sharpen 0x0.5 "$output/favicon-16.tmp.png"
+  magick "$cropped" -resize 32x32 -sharpen 0x0.5 "$output/favicon-32.tmp.png"
   magick "$output/favicon-16.tmp.png" "$output/favicon-32.tmp.png" "$output/favicon.ico"
-  rm -f "$output/favicon-16.tmp.png" "$output/favicon-32.tmp.png"
+  rm -f "$output/favicon-16.tmp.png" "$output/favicon-32.tmp.png" "$cropped"
   echo "  favicon.ico (16+32)"
 
   echo ""
@@ -181,23 +204,25 @@ cmd_resize() {
 # ── Generate pose subcommand ─────────────────────────────────────────
 
 cmd_generate_pose() {
-  local activity="" look="" count=2 name=""
+  local activity="" look="" count=2 name="" outdir="$POSES_DIR"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --activity|-a) activity="$2"; shift 2 ;;
-      --look|-l)     look="$2"; shift 2 ;;
-      --count|-c)    count="$2"; shift 2 ;;
-      --name|-n)     name="$2"; shift 2 ;;
+      --activity|-a)    activity="$2"; shift 2 ;;
+      --look|-l)        look="$2"; shift 2 ;;
+      --count|-c)       count="$2"; shift 2 ;;
+      --name|-n)        name="$2"; shift 2 ;;
+      --output-dir|-d)  outdir="$2"; shift 2 ;;
       *) die "Unknown generate pose option: $1" ;;
     esac
   done
 
   [[ -n "$activity" ]] || die "generate pose requires --activity <description>"
   require_gemini
+  mkdir -p "$outdir"
 
   if [[ -z "$name" ]]; then
-    local last=$(ls "$POSES_DIR"/*.png 2>/dev/null | sort | tail -1)
+    local last=$(ls "$outdir"/*.png 2>/dev/null | sort | tail -1)
     local next_num=1
     if [[ -n "$last" ]]; then
       local last_base="${last:t:r}"
@@ -223,25 +248,26 @@ cmd_generate_pose() {
   echo ""
 
   for num in $(seq 1 "$count"); do
-    generate_image "$POSES_DIR/${name}-v${num}.png" "$prompt"
+    generate_image "$outdir/${name}-v${num}.png" "$prompt"
     echo ""
   done
 
-  echo "Done. Check $POSES_DIR/ for results."
+  echo "Done. Check $outdir/ for results."
 }
 
 # ── Generate scene subcommand ────────────────────────────────────────
 
 cmd_generate_scene() {
-  local activity="" theme="" format="banner" count=2 name=""
+  local activity="" theme="" format="banner" count=2 name="" outdir="$SCENES_DIR"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --activity|-a) activity="$2"; shift 2 ;;
-      --theme|-t)    theme="$2"; shift 2 ;;
-      --format|-f)   format="$2"; shift 2 ;;
-      --count|-c)    count="$2"; shift 2 ;;
-      --name|-n)     name="$2"; shift 2 ;;
+      --activity|-a)    activity="$2"; shift 2 ;;
+      --theme|-t)       theme="$2"; shift 2 ;;
+      --format|-f)      format="$2"; shift 2 ;;
+      --count|-c)       count="$2"; shift 2 ;;
+      --name|-n)        name="$2"; shift 2 ;;
+      --output-dir|-d)  outdir="$2"; shift 2 ;;
       *) die "Unknown generate scene option: $1" ;;
     esac
   done
@@ -250,6 +276,7 @@ cmd_generate_scene() {
   [[ -n "$theme" ]] || die "generate scene requires --theme <lagoon|meadow>"
   [[ -n "${THEME_COLORS[$theme]:-}" ]] || die "Unknown theme: $theme (try: lagoon, meadow)"
   require_gemini
+  mkdir -p "$outdir"
 
   if [[ -z "$name" ]]; then
     local slug="${activity// /-}"
@@ -273,28 +300,30 @@ cmd_generate_scene() {
   echo ""
 
   for num in $(seq 1 "$count"); do
-    generate_image "$SCENES_DIR/${name}-${num}.png" "$prompt"
+    generate_image "$outdir/${name}-${num}.png" "$prompt"
     echo ""
   done
 
-  echo "Done. Check $SCENES_DIR/ for results."
+  echo "Done. Check $outdir/ for results."
 }
 
 # ── Generate favicon subcommand ──────────────────────────────────────
 
 cmd_generate_favicon() {
-  local theme="" count=2
+  local theme="" count=2 outdir="$FAVICONS_DIR"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --theme|-t) theme="$2"; shift 2 ;;
-      --count|-c) count="$2"; shift 2 ;;
+      --theme|-t)       theme="$2"; shift 2 ;;
+      --count|-c)       count="$2"; shift 2 ;;
+      --output-dir|-d)  outdir="$2"; shift 2 ;;
       *) die "Unknown generate favicon option: $1" ;;
     esac
   done
 
   [[ -n "$theme" ]] || die "generate favicon requires --theme <lagoon|meadow|default>"
   require_gemini
+  mkdir -p "$outdir"
 
   # NOTE: Favicon prompt is a starting point — iterate through actual
   # generation sessions to refine what works best at small sizes.
@@ -306,7 +335,10 @@ cmd_generate_favicon() {
     colors="Clean white background."
   fi
 
-  local prompt="Same character as reference sheet. A close-up of Penny's face, centered, looking directly at the viewer with a warm friendly expression. Tight crop — just head and upper body filling the frame. Simple composition that reads clearly at small sizes. Bold shapes, minimal fine detail. ${colors} No whiskers. No reference sheet in output. Just one image."
+  local identity='This is a character reference sheet for a baby hedgehog named Penny. Using the exact same character shown — same proportions, same face, same art style, same coloring — generate a SINGLE NEW IMAGE of just this one character.'
+  local scene="She is sitting facing the viewer with a warm, friendly smile. Tight crop showing just her head and upper body. ${colors}"
+  local guard='Keep the same art style — soft pencil lines, gentle shading. No whiskers. Square 1:1 composition. Do NOT include the reference sheet. Just one image filling the frame.'
+  local prompt="${identity} ${scene} ${guard}"
 
   echo "Generating favicon source: $theme"
   echo "Variants: $count"
@@ -314,12 +346,12 @@ cmd_generate_favicon() {
   echo ""
 
   for num in $(seq 1 "$count"); do
-    generate_image "$FAVICONS_DIR/${theme}-${num}.png" "$prompt"
+    generate_image "$outdir/${theme}-${num}.png" "$prompt"
     echo ""
   done
 
-  echo "Done. Check $FAVICONS_DIR/ for results."
-  echo "Use 'penny/cli resize --input $FAVICONS_DIR/<chosen>.png --output <target>/' to package."
+  echo "Done. Check $outdir/ for results."
+  echo "Use 'penny/cli resize --input $outdir/<chosen>.png --output <target>/' to package."
 }
 
 # ── Subcommand routing ───────────────────────────────────────────────

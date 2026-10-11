@@ -15,7 +15,7 @@ penny/cli list poses
 penny/cli list scenes
 penny/cli list themes
 
-# Generate a new pose
+# Generate a new pose (saves to penny/poses/ by default)
 penny/cli generate pose --activity "debugging code with a laptop" --look nerdy
 
 # Generate a themed scene
@@ -23,6 +23,10 @@ penny/cli generate scene --theme lagoon --format banner --activity "reading by a
 
 # Generate favicon source images
 penny/cli generate favicon --theme lagoon
+
+# Save generated assets to YOUR project instead of Bramble
+penny/cli generate favicon --theme lagoon --output-dir ~/develop/myproject/assets/
+penny/cli generate pose --activity "waving hello" --output-dir ~/develop/myproject/images/
 
 # Package into favicon/icon set for a project
 penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
@@ -57,6 +61,7 @@ Options:
 - `--look`: nerdy, cozy, sporty, professional, explorer, geek, default
 - `--count`: variants to generate (default 2, curate the best)
 - `--name`: override output filename
+- `--output-dir`: save to a different directory (default: penny/poses/)
 
 ### Scenes
 Best for: banners, hero images, README headers.
@@ -70,6 +75,7 @@ Options:
 - `--theme` (required): lagoon or meadow
 - `--format`: banner (3:1) or square (1:1)
 - `--count`: variants (default 2)
+- `--output-dir`: save to a different directory (default: penny/scenes/)
 
 ### Favicons
 Best for: project favicon source images.
@@ -78,11 +84,14 @@ Best for: project favicon source images.
 penny/cli generate favicon --theme lagoon
 ```
 
-Favicon prompts are a starting point — curate results and iterate on the prompt if needed.
+Options:
+- `--theme` (required): lagoon, meadow, or default
+- `--count`: variants (default 2)
+- `--output-dir`: save to a different directory (default: penny/favicons/)
 
 ## Resize / Packaging
 
-Convert any source PNG into a complete favicon + app icon set:
+Convert any source PNG into a complete favicon + app icon set. Non-square sources are center-cropped to square automatically. Small sizes (16, 32) are sharpened.
 
 ```bash
 penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
