@@ -54,7 +54,7 @@ pnpm check        # type checking
 ```
 
 ## Docker
-Multi-platform build (linux/amd64, linux/arm64). Node adapter, port 3000.
+Single-platform build, `linux/amd64` (the shared `ghcr-build-push` default). Node adapter, port 3000.
 
 CI: `.github/workflows/docker.yml` builds and pushes to `ghcr.io/noahkiss/bramble:latest` on every push to main.
 
