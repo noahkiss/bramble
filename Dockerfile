@@ -1,4 +1,4 @@
-FROM node:24-slim AS builder
+FROM node:26-slim AS builder
 
 RUN corepack enable pnpm
 
@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:24-slim AS runtime
+FROM node:26-slim AS runtime
 
 RUN corepack enable pnpm
 
