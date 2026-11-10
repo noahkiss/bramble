@@ -147,7 +147,7 @@ Penny is a baby hedgehog in a children's book illustration style. She is the mas
 
 | Look | Accessories | Used For |
 |------|------------|----------|
-| **Nerdy** | Round glasses + red polka-dot bowtie | TinyLedger, financial/data apps |
+| **Nerdy** | Round glasses + red polka-dot bowtie | Financial and data apps |
 | **Sporty** | Headband, sneakers, or jersey | Fitness/activity apps |
 | **Cozy** | Scarf, mug, blanket | Cleaver Manor, home/life apps |
 | **Professional** | Tiny briefcase or clipboard | Productivity/business tools |

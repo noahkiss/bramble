@@ -107,7 +107,7 @@ git commit -m "Move Penny assets from docs/penny/ to penny/ at repo root"
 
 ### Task 3: Clean generate scripts and save as examples
 
-The old `generate.sh` and `generate-scenes.sh` had hardcoded 1P Connect IPs and `op read` references. Create cleaned versions as examples in `penny/examples/`.
+The old `generate.sh` and `generate-scenes.sh` had hardcoded credential-server addresses and secret-manager reads. Create cleaned versions as examples in `penny/examples/`.
 
 **Files:**
 - Create: `penny/examples/batch-generate-hoglets.sh`
@@ -861,10 +861,10 @@ penny/cli generate scene --theme lagoon --format banner --activity "reading by a
 penny/cli generate favicon --theme lagoon
 
 # Package into favicon/icon set for a project
-penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
+penny/cli resize --input penny/favicons/lagoon-1.png --output ../myproject/static/
 ```
 
-All commands run from the Bramble repo root (`/home/<user>/develop/bramble`).
+All commands run from the Bramble repo root.
 
 ## What's Available
 
@@ -921,7 +921,7 @@ Favicon prompts are a starting point — curate results and iterate on the promp
 Convert any source PNG into a complete favicon + app icon set:
 
 ```bash
-penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
+penny/cli resize --input penny/favicons/lagoon-1.png --output ../myproject/static/
 ```
 
 Outputs:
@@ -1041,7 +1041,7 @@ penny/cli resize 2>&1 || true
 
 ```bash
 grep -r 'op read\|op://' penny/ .env.example || echo "Clean — no 1P references"
-grep -r '100\.\|10\.10\.' penny/ .env.example || echo "Clean — no IPs"
+grep -rE '([0-9]{1,3}\.){3}[0-9]{1,3}' penny/ .env.example || echo "Clean — no IPs"
 ```
 
 **Step 6: Final commit if any cleanup needed**

@@ -47,7 +47,7 @@ The base character stays the same. Only accessories and context change.
 | Look | Accessories | Used For |
 |------|------------|----------|
 | **Default** | None — just Penny being herself | Brand materials, favicon base, Bramble |
-| **Nerdy** | Round wire-frame glasses + red polka-dot bowtie | TinyLedger, financial/data apps |
+| **Nerdy** | Round wire-frame glasses + red polka-dot bowtie | Financial and data apps |
 | **Cozy** | Scarf, mug, blanket | Cleaver Manor, home/life apps |
 | **Sporty** | Headband, sneakers, or jersey | Fitness/activity apps |
 | **Professional** | Tiny briefcase or clipboard | Productivity/business tools |

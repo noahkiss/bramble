@@ -13,7 +13,7 @@ penny/
   GENERATION-NOTES.md   — generation history (moved from docs/penny/)
   character-sheet.png   — primary Gemini generation reference
   cli                   — executable zsh CLI
-  reference/            — original source images from TinyLedger
+  reference/            — original source images
   poses/                — 26 curated white-bg poses (01-sitting.png, etc.)
   scenes/               — themed scenes (lagoon-banner-dock-1.png, etc.)
   favicons/             — generated favicon source images (per-theme)
@@ -83,7 +83,7 @@ Takes a source PNG, outputs a complete icon set to a target directory:
 Uses ImageMagick 7 for all resizing + ICO creation.
 
 ```
-penny/cli resize --input penny/favicons/lagoon.png --output ~/develop/myproject/static/
+penny/cli resize --input penny/favicons/lagoon.png --output ../myproject/static/
 ```
 
 ### list
@@ -102,7 +102,7 @@ Agent-facing skill file. Covers:
 4. Prompt guidance (condensed from PENNY.md)
 5. Character bible reference (points to PENNY.md)
 
-Other projects reference: `@/home/<user>/develop/bramble/penny/SKILL.md`
+Other projects reference: `penny/SKILL.md` in their checkout of this repo
 
 ## Not In Scope
 

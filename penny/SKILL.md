@@ -25,14 +25,14 @@ penny/cli generate scene --theme lagoon --format banner --activity "reading by a
 penny/cli generate favicon --theme lagoon
 
 # Save generated assets to YOUR project instead of Bramble
-penny/cli generate favicon --theme lagoon --output-dir ~/develop/myproject/assets/
-penny/cli generate pose --activity "waving hello" --output-dir ~/develop/myproject/images/
+penny/cli generate favicon --theme lagoon --output-dir ../myproject/assets/
+penny/cli generate pose --activity "waving hello" --output-dir ../myproject/images/
 
 # Package into favicon/icon set for a project
-penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
+penny/cli resize --input penny/favicons/lagoon-1.png --output ../myproject/static/
 ```
 
-All commands run from the Bramble repo root (`/home/<user>/develop/bramble`).
+All commands run from the Bramble repo root.
 
 ## What's Available
 
@@ -94,7 +94,7 @@ Options:
 Convert any source PNG into a complete favicon + app icon set. Non-square sources are center-cropped to square automatically. Small sizes (16, 32) are sharpened.
 
 ```bash
-penny/cli resize --input penny/favicons/lagoon-1.png --output ~/develop/myproject/static/
+penny/cli resize --input penny/favicons/lagoon-1.png --output ../myproject/static/
 ```
 
 Outputs:

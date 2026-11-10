@@ -60,7 +60,7 @@ docs/penny/
   PENNY.md                    — character bible, prompt templates
   GENERATION-NOTES.md         — this file
   character-sheet.png         — composite of all canonical poses (use as reference)
-  reference/                  — original source images from TinyLedger
+  reference/                  — original source images
     nerdy-sitting.png
     nerdy-sitting-transparent.png
   poses/                      — all canonical Penny poses (numbered sequentially)
@@ -289,7 +289,7 @@ docs/penny/
   PENNY.md                    — character bible, prompt templates
   GENERATION-NOTES.md         — this file
   character-sheet.png         — composite of 6 default poses (primary generation input)
-  reference/                  — original source images from TinyLedger
+  reference/                  — original source images
     nerdy-sitting.png
     nerdy-sitting-transparent.png
   poses/                      — curated white-background poses (26 images)

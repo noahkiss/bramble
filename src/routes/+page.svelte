@@ -159,7 +159,7 @@
 					{selectValue ?? 'Choose a project...'}
 				</Select.Trigger>
 				<Select.Content align="start" strategy="fixed">
-					<Select.Item value="tinyledger">TinyLedger</Select.Item>
+					<Select.Item value="ledger">Ledger</Select.Item>
 					<Select.Item value="recall">Recall</Select.Item>
 					<Select.Item value="storyteller">Storyteller</Select.Item>
 					<Select.Item value="bramble">Bramble</Select.Item>
@@ -302,7 +302,7 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<Card.Root data-component="feature-card">
 				<Card.Header>
-					<Card.Title>TinyLedger</Card.Title>
+					<Card.Title>Ledger</Card.Title>
 					<Card.Description>Personal bookkeeping for freelancers</Card.Description>
 				</Card.Header>
 				<Card.Content>
