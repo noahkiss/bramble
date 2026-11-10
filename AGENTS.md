@@ -56,7 +56,7 @@ pnpm check        # type checking
 ## Docker
 Single-platform build, `linux/amd64` (the shared `ghcr-build-push` default). Node adapter, port 3000.
 
-CI: `.github/workflows/docker.yml` builds and pushes to `ghcr.io/noahkiss/bramble:latest` on every push to main.
+CI: `.github/workflows/docker.yml` builds and pushes to `ghcr.io/noahkiss/bramble:latest` on every push to main, except one that touches only Markdown, `docs/`, `LICENSE` or `.claude/`.
 
 ## Key Files
 - `src/app.css` — theme definitions (all CSS custom properties)
